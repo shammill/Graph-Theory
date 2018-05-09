@@ -7,7 +7,7 @@
 #include "point.h"
 #include <iostream>
 #include <math.h>
-#include <cmath>
+#include <iomanip>
 
 using namespace std;
 
@@ -17,26 +17,18 @@ Point::Point(double xCoordinate, double yCoordinate) {
     this->yCoordinate = yCoordinate;
 }
 
-/// Returns the Euclidean distance between this Point and the Point* parameter to the function.
+/// Returns the Euclidean distance between this Point and the other Point*.
+/// Euclidean Distance calculation. http://en.wikipedia.org/wiki/Euclidean_distance
 double Point::distanceTo (Point* point) {
-    const int SQUARED = 2;
-    int x1 = xCoordinate;
-    int y1 = yCoordinate;
-    int x2 = point->xCoordinate;	// consider removing getters? Accessing directly.
-    int y2 = point->yCoordinate;
+    double dx = xCoordinate - point->xCoordinate;
+    double dy = yCoordinate - point->yCoordinate;
 
-	// Euclidean Distance calculation. http://en.wikipedia.org/wiki/Euclidean_distance
-    double distance = sqrt((pow((x1 - x2),SQUARED) + (pow((y1 - y2),SQUARED))));
+    double distance = sqrt((dx * dx) + (dy * dy));
     return distance;
-}
-
-/// Destructor.
-Point::~Point() {
-
 }
 
 /// Produces a string representation of this Point. e.g."2 13"
 ostream& operator<<(ostream& out, Point& point) {
-    out << point.xCoordinate << " " << point.yCoordinate;
-
+    out << setw(2) << point.xCoordinate << " " << setw(2) << point.yCoordinate;
+    return out;
 }

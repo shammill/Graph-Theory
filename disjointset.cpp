@@ -6,13 +6,11 @@
 
 #include "disjointset.h"
 #include <iostream>
-#include <map>
 
 using namespace std;
 
 /// Constructor which sets the size of this DisjointSet.
 DisjointSet::DisjointSet(int N) {
-
     this->N = N;
     id = new int[N];
     size = new int[N];
@@ -24,7 +22,8 @@ DisjointSet::DisjointSet(int N) {
 
 /// Destructor.
 DisjointSet::~DisjointSet() {
-
+    delete[] size;
+    delete[] id;
 }
 
 /// Returns the index of the parent set of the element in the parameter.

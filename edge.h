@@ -19,9 +19,6 @@ public:
     /// Constructor  which  sets  the  source  vertex, the  destination  vertex  and  the  weight for this Edge.
     Edge(Vertex*, Vertex*, double);
 
-    /// Destructor.
-    ~Edge();
-
     /// Returns a pointer to the source vertex.
     Vertex* getSource();
 
@@ -40,11 +37,9 @@ public:
 
 
 private:
-
     Vertex* source;
     Vertex* destination;
     double weight;
-
 };
 
 #endif // EDGE_H

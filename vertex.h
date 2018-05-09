@@ -76,7 +76,6 @@ private:
     /// Store the minimum distance from the source to this vertex.
     /// Used by Dijkstra’s algorithm.
     double minDistance;
-
 };
 
 #endif // VERTEX_H

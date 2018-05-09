@@ -46,11 +46,22 @@ public:
     friend ostream& operator<<(ostream&, Graph&);
 
 private:
+    unsigned int numVertices;
 
-    unsigned int numVertices;       /// Instance field for the number of vertices in the graph.
-    double** weights;               /// The adjacency matrix for this graph. Two dimensional array of weights.
-    priority_queue<Edge*, vector<Edge*>, Edge> edges;   /// Storage  for  edges  to  be  used  by  Kruskal’s algorithm  for  calculating  the  minimum  cost spanning tree.
-    vector<Vertex*> vertices;       /// Storage for graph vertices
+     /// The adjacency matrix for this graph. Two dimensional array of weights.
+    double** weights;
+
+    /// Storage  for  edges  to  be  used  by  Kruskal’s algorithm  for  calculating  the  minimum  cost spanning tree.
+    priority_queue<Edge*, vector<Edge*>, Edge> edges;
+
+    /// Storage for graph vertices
+    vector<Vertex*> vertices;
+
+    /// Outputs the results from the bfs to the console.
+    void bfsOutput(unsigned int);
+
+    /// Outputs the results from the dijkstras algorithm to the console.
+    void dijkstraOutput(unsigned int);
 
 };
 

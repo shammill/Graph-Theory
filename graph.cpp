@@ -9,14 +9,15 @@
 
 using namespace std;
 
+const int INFINITY = 1000000000;
+
 /// Constructor sets the number of vertices in this Graph. Initialises the two dimensional
 /// array of weights by setting all  values to INFINITY (some value larger than any
-/// possible edge weight) except the diagonal of the array where the weight is set to 0.
+/// possible edge weight) except the diagonal of the array where the weight is set to 0.00.
 Graph::Graph(unsigned int numVertices) {
-
     this->numVertices = numVertices;
-
     weights = new double*[numVertices];
+
     for(unsigned int row = 0; row < numVertices; ++row) {
         weights[row] = new double[numVertices];
 		for(unsigned int column = 0; column < numVertices; ++column) {
@@ -24,7 +25,7 @@ Graph::Graph(unsigned int numVertices) {
 				weights[row][column] = 0.00;
 			}
 			else {
-				weights[row][column] = 1000000000;
+				weights[row][column] = INFINITY;
 			}
 		}
     }
@@ -34,8 +35,9 @@ Graph::Graph(unsigned int numVertices) {
 Graph::~Graph() {
     for(unsigned int i = 0 ; i < numVertices ; i++) {
         delete[] weights[i];
-        delete[] weights;
     }
+    delete[] weights;
+    vertices.clear();
 }
 
 /// Adds pointer to Vertex to the collection of vertices for this Graph.
@@ -65,20 +67,22 @@ void Graph::addEdge(Edge* edge) {
 /// edges of the MST in the adjacency list of each Vertex. Returns the cost of the minimum spanning tree.
 double Graph::minimumSpanningTreeCost() {
     double minCost;
-    int edgeCount = 0;
-    DisjointSet mst = DisjointSet(numVertices);                     // initialise DisjointSet of size N
-    while((!edges.empty()) & (edgeCount < numVertices - 1)) {       // while edges not empty AND edgeCount < N – 1
-        Edge* edge = edges.top();                                   // edge pq.pop()
+    unsigned int edgeCount = 0;
+    DisjointSet mst = DisjointSet(numVertices);
+
+    while((!edges.empty()) & (edgeCount < numVertices - 1)) {
+        Edge* edge = edges.top();
         edges.pop();
         unsigned int source = edge->getSource()->getId();
         unsigned int destination = edge->getDestination()->getId();
-        if (!mst.sameComponent(source, destination)) {               // if NOT sameComponent(edge.source, edge.destination)
-                edgeCount++;                                        // increment edgeCount
-                mst.join(source, destination);                      // join(edge.source, edge.destination)
+
+        if (!mst.sameComponent(source, destination)) {
+                edgeCount++;
+                mst.join(source, destination);
                 Vertex* vertex1 = getVertex(source);
                 Vertex* vertex2 = getVertex(destination);
-                vertex2->addAdjacency(source);                      // add source to adjacency list of destination
-                vertex1->addAdjacency(destination);                 // add destination to adjacency list of current
+                vertex2->addAdjacency(source);
+                vertex1->addAdjacency(destination);
                 edges.push(edge);
                 minCost = minCost + edge->getWeight();
             }
@@ -86,56 +90,51 @@ double Graph::minimumSpanningTreeCost() {
     return minCost;
 }
 
-/// Determines the shortest path from the source vertex to all other vertices. Prints the length
-/// of  the  path  and  the  vertex  identifiers  in  the path.
+/// Determines the shortest path from the source vertex to all other vertices using dijkstras algorithm.
 void Graph::dijkstra(unsigned int sourceId) {
-
-    priority_queue<Vertex*, vector<Vertex*>, Vertex> vertexQueue;      /// create a priority queue of Vertex*
-    for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {  ///for all vertices
+    priority_queue<Vertex*, vector<Vertex*>, Vertex> vertexQueue;
+    for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {
         Vertex* vertex = *v;
-        vertex->setDiscovered(false);				/// set visited to false
-		vertex->setPredecessorId(sourceId);			/// set the predecessorId to sourceId
-		vertex->setMinDistance(weights[sourceId][vertex->getId()]);		/// set minimum distance to distance from source to this vertex from the adjacency matrix (weights).s
-		vertexQueue.push(vertex);							/// push vertex onto priority queue
-    } // end for
+        vertex->setDiscovered(false);
+		vertex->setPredecessorId(sourceId);
+		vertex->setMinDistance(weights[sourceId][vertex->getId()]);
+		vertexQueue.push(vertex);
+    }
 
-	while(!vertexQueue.empty()) {				/// while priority queue is not empty
-        Vertex* u = vertexQueue.top();			/// queuepoll the priority queue (let this vertex be called u)
+	while(!vertexQueue.empty()) {
+        Vertex* u = vertexQueue.top();
         vertexQueue.pop();
-		u->setDiscovered(true);			        /// mark u as visited
+		u->setDiscovered(true);
 
 		for (vector<Vertex*>::iterator i = this->vertices.begin(); i != this->vertices.end(); i++) {
             Vertex* v = *i;
-            if ((weights[u->getId()][v->getId()] < 1000000000) & (!v->isDiscovered())) {
-			    //cout << "U-ID: " << u->getId() << ":" << u->getMinDistance() << " -- " << "V-ID: " << v->getId() << ":" << v->getMinDistance() << endl;
+            if ((weights[u->getId()][v->getId()] < INFINITY) & (!v->isDiscovered())) {
 				if (u->getMinDistance() + weights[u->getId()][v->getId()] <= v->getMinDistance()) {
-                    //cout << "u + w < v -- I change." << endl;
-					v->setMinDistance(u->getMinDistance() + weights[u->getId()][v->getId()]); 	//set v.minDistance to the new valuee
-					v->setPredecessorId(u->getId());     // v->predecessorId to u.id
+					v->setMinDistance(u->getMinDistance() + weights[u->getId()][v->getId()]);
+					v->setPredecessorId(u->getId());
 					vertexQueue.push(v);
-				}	/// end if
+				}
             }
-			//}	/// end if
-        }	/// end for
-    }	 /// end while
+        }
+	}
+	dijkstraOutput(sourceId);
+}
 
-    // output the length of the shortest paths and the paths
-	for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {	/// for each vertex other than the source
+/// Outputs the results from the dijkstras algorithm to the console.
+/// Prints the length of  the  path  and  the  vertex  identifiers  in  the path.
+void Graph::dijkstraOutput(unsigned int sourceId) {
+	for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {
         Vertex* vertex = *v;
-        double distance = vertex->getMinDistance();		///  retrieve the minimum distance
+        double distance = vertex->getMinDistance();
 
-        unsigned int predecessor = 1000000000;
+        unsigned int predecessor = INFINITY;
         vector <unsigned int> path;
 
-		if ((distance == 1000000000) & (!vertex->getId() == sourceId)) {				/// if minDistance == INFINITY
-            cout << "NO PATH  from " << sourceId << " to ";
-            cout << fixed << setw(2) << vertex->getId() << endl;
+		if ((distance == INFINITY) & (!vertex->getId() == sourceId)) {
+            cout << "NO PATH  from " << sourceId << " to " << fixed << setw(2) << vertex->getId() << endl;
 		}
         else if (!vertex->getId() == sourceId) {
-            cout << "Distance from 0 to ";
-            cout << fixed << setw(2) << vertex->getId() << " = ";
-            cout << setprecision(2) << fixed << setw(6) << distance;
-            cout << " travelling via ";
+            cout << "Distance from 0 to " << fixed << setw(2) << vertex->getId() << " = " << setprecision(2) << fixed << setw(6) << distance << " travelling via ";
 
             while (predecessor != sourceId) {
                 path.insert(path.begin() ,vertex->getId());
@@ -147,65 +146,57 @@ void Graph::dijkstra(unsigned int sourceId) {
             }
             for (vector<unsigned int>::iterator p = path.begin(); p != path.end(); p++) {
                 unsigned int node = *p;
-                cout << setw(2);
-                cout << node << " ";
+                cout << setw(2) << node << " ";
             }
             cout << endl;
         }
-    }  	/// end if
+    }
 }
 
 /// Determines the shortest path from the source vertex to all other vertices using only the adjacencies
-/// in the minimum spanning tree. Prints the length of the path and the vertex identifiers in the path.
+/// in the minimum spanning tree.
 void Graph::bfs(unsigned int sourceId) {
-
-    for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {     // for each vertex in the graph
+    for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {
         Vertex* vertex = *v;
-        vertex->setDiscovered(false);                   // set vertex discovered field to false
+        vertex->setDiscovered(false);
     }
+    queue<Vertex*> vertexQueue;
+    this->vertices[sourceId]->setDiscovered(true);
+    vertexQueue.push(vertices[sourceId]);
 
-    queue<Vertex*> vertexQueue;                                 // create an empty queue
-    this->vertices[sourceId]->setDiscovered(true);              // set source vertex discovered to true
-    vertexQueue.push(vertices[sourceId]);                       // push source vertex onto queue
-
-    while (!vertexQueue.empty()) {                          // while queue is not empty
-        Vertex* currentVertex = vertexQueue.front();        /// set current to front of queue (i.e. remove front)
+    while (!vertexQueue.empty()) {
+        Vertex* currentVertex = vertexQueue.front();
         vertexQueue.pop();
-       // cout << "Current Vertex = " << currentVertex->getId() << endl;
-
-        //for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {   /// for each vertex adjacent to current
-        //Vertex* vertex = *v;
 
         set<unsigned int>* adjacencies = currentVertex->getAdjacencies();
-            for (set<unsigned int>::iterator i = adjacencies->begin(); i != adjacencies->end(); i++) {
-                unsigned int index = *i;
-               // cout << currentVertex->getId() << " - i: " << index << endl;
-                Vertex* adjacent = this->vertices[index];
-                if (!adjacent->isDiscovered()) {                      /// if not adjacent.discovered
-                    adjacent->setPredecessorId(currentVertex->getId());                   /// set adjacent.predecessor to current id
-                    //cout << "I set adjacent: " << adjacent->getId() << " to have pred: " << adjacent->getPredecessorId() << endl;
-                    adjacent->setDiscovered(true);                       /// set adjacent.discovered to true
-                    vertexQueue.push(adjacent);                          /// push adjacent onto queue
-                } //end if
-            } //end for
-        //}   //end for
-    }   //end while
+        for (set<unsigned int>::iterator i = adjacencies->begin(); i != adjacencies->end(); i++) {
+            unsigned int index = *i;
+            Vertex* adjacent = this->vertices[index];
+            if (!adjacent->isDiscovered()) {
+                adjacent->setPredecessorId(currentVertex->getId());
+                adjacent->setDiscovered(true);
+                vertexQueue.push(adjacent);
+            }
+        }
+    }
+    bfsOutput(sourceId);
+}
 
-    // output the length of the shortest paths and the paths
-	for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {	/// for each vertex other than the source
+/// Outputs the results from the bfs to the console.
+/// Prints the length of the path and the vertex identifiers in the path.
+void Graph::bfsOutput(unsigned int sourceId) {
+	for (vector<Vertex*>::iterator v = this->vertices.begin(); v != this->vertices.end(); v++) {
         Vertex* vertex = *v;
-        double distance = 0;		///  retrieve the minimum distance
+        double distance = 0;
 
-        unsigned int predecessor = 1000000000;
+        unsigned int predecessor = INFINITY;
         vector <unsigned int> path;
 
-		if ((vertex->getMinDistance() == 1000000000) & (!vertex->getId() == sourceId)) {				/// if minDistance == INFINITY
-            cout << "NO PATH  from " << sourceId << " to ";
-            cout << fixed << setw(2) << vertex->getId() << endl;
+		if ((vertex->getMinDistance() == INFINITY) & (!vertex->getId() == sourceId)) {
+            cout << "NO PATH  from " << sourceId << " to " << fixed << setw(2) << vertex->getId() << endl;
 		}
         else if (!vertex->getId() == sourceId) {
-            cout << "Distance from 0 to ";
-            cout << fixed << setw(2) << vertex->getId() << " = ";
+            cout << "Distance from 0 to " << fixed << setw(2) << vertex->getId() << " = ";
 
             while (predecessor != sourceId) {
                 path.insert(path.begin() ,vertex->getId());
@@ -216,29 +207,31 @@ void Graph::bfs(unsigned int sourceId) {
                     path.insert(path.begin(), (vertex->getId()));
                 }
             }
-            cout << setprecision(2) << fixed << setw(6) << distance;
-            cout << " travelling via ";
+            cout << setprecision(2) << fixed << setw(6) << distance << " travelling via ";
 
             for (vector<unsigned int>::iterator p = path.begin(); p != path.end(); p++) {
                 unsigned int node = *p;
-                cout << setw(2);
-                cout << node << " ";
+                cout << setw(2) << node << " ";
             }
             cout << endl;
         }
     }
 }
 
-/// Outputs the adjacency matrix for the graph. If an edge weight is INFINITY, - should be printed instead of a number.
+/// Outputs the adjacency matrix for the graph.
 ostream& operator<<(ostream& out, Graph& graph) {
-
     for(unsigned int row = 0; row < graph.numVertices; ++row) {
 		for(unsigned int column = 0; column < graph.numVertices; ++column) {
 
 			double weight = graph.weights[row][column];
-			out << setprecision(2) << fixed << setw(7);
+            if (column == 0) {
+                out << setprecision(2) << fixed << setw(6);
+            }
+            else {
+                out << setprecision(2) << fixed << setw(7);
+            }
 
-			if (weight == 1000000000) {
+			if (weight == INFINITY) {
 				out << "-";
 			}
 			else {
@@ -249,5 +242,3 @@ ostream& operator<<(ostream& out, Graph& graph) {
     }
     return out;
 }
-
-

@@ -113,9 +113,6 @@ int main(int argc, char *argv[]) {
    graph->bfs(SOURCE);
    cout << endl;
 
-    string test;
-    cin >> test;
-
    delete random;
    for (int i = 0; i < numCities; i++) {
       delete cities[i];

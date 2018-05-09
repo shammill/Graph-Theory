@@ -19,11 +19,6 @@ Edge::Edge(Vertex* source, Vertex* destination, double weight) {
     this->weight = weight;
 }
 
-/// Destructor.
-Edge::~Edge() {
-
-}
-
 /// Returns a pointer to the source vertex.
 Vertex* Edge::getSource() {
     return this->source;
