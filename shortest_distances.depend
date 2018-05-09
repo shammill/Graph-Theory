@@ -1,0 +1,61 @@
+# depslib dependency file v1.0
+1400568688 source:b:\c_programming\shortest_distances\disjointset.cpp
+	"disjointset.h"
+	<iostream>
+	<map>
+
+1400568671 b:\c_programming\shortest_distances\disjointset.h
+	<iostream>
+
+1399614324 source:b:\c_programming\shortest_distances\edge.cpp
+	"edge.h"
+	<iostream>
+
+1399614324 b:\c_programming\shortest_distances\edge.h
+	<iostream>
+	"vertex.h"
+
+1400563468 b:\c_programming\shortest_distances\vertex.h
+	<iostream>
+	<set>
+
+1400588811 source:b:\c_programming\shortest_distances\graph.cpp
+	"graph.h"
+	"disjointset.h"
+	<iostream>
+	<iomanip>
+
+1399698899 b:\c_programming\shortest_distances\graph.h
+	<iostream>
+	<queue>
+	"vertex.h"
+	"edge.h"
+
+1399698862 source:b:\c_programming\shortest_distances\point.cpp
+	"point.h"
+	<iostream>
+	<math.h>
+	<cmath>
+
+1399614325 b:\c_programming\shortest_distances\point.h
+	<iostream>
+
+1399614325 source:b:\c_programming\shortest_distances\random.cpp
+	<cstdlib>
+	<ctime>
+	"random.h"
+
+1399614325 b:\c_programming\shortest_distances\random.h
+
+1400568841 source:b:\c_programming\shortest_distances\roads.cpp
+	<iostream>
+	<fstream>
+	<iomanip>
+	"random.h"
+	"point.h"
+	"graph.h"
+
+1400581200 source:b:\c_programming\shortest_distances\vertex.cpp
+	"vertex.h"
+	<iostream>
+
